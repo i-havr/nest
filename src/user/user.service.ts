@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from '@app/user/dto/createUser.dto';
 import { LoginUserDto } from '@app/user/dto/loginUser.dto';
+import { UpdateUserDto } from '@app/user/dto/updateUser.dto';
 import { UserEntity } from '@app/user/user.entity';
 import { Repository } from 'typeorm';
 import { sign } from 'jsonwebtoken';
@@ -71,7 +72,17 @@ export class UserService {
     return userByEmail;
   }
 
-  // функція findUserById повертає дані залогіненого юзера після того як токен пройшов перевірку та ми отримали id юзера
+  async updateUser(
+    userId: number,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UserEntity> {
+    const user = await this.findUserById(userId);
+    const updatedUser = { ...user, ...updateUserDto };
+
+    return await this.userRepository.save(updatedUser);
+  }
+
+  // функція findUserById повертає дані залогіненого юзера після того як токен пройшов перевірку та ми отримали id юзера. Використовуємо у мідлварі.
   findUserById(id: number): Promise<UserEntity> {
     return this.userRepository.findOne({
       where: { id },

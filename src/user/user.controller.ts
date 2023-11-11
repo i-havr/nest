@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   UseGuards,
   UsePipes,
   ValidationPipe,
@@ -10,6 +11,7 @@ import {
 import { UserService } from '@app/user/user.service';
 import { CreateUserDto } from '@app/user/dto/createUser.dto';
 import { LoginUserDto } from '@app/user/dto/loginUser.dto';
+import { UpdateUserDto } from '@app/user/dto/updateUser.dto';
 
 import { User } from '@app/user/decorators/user.decorator';
 import { UserEntity } from '@app/user/user.entity';
@@ -44,11 +46,25 @@ export class UserController {
   @Get('user')
   @UseGuards(AuthGuard)
   async currentUser(
-    // @Req() request: IExpressRequest, <== можна було лишити так, але ми створили свій декоратор
+    // @Req() request: IExpressRequest, <== можна було лишити так, але ми створили свій декоратор @User
     @User() user: UserEntity,
     // @User('id') currentId: number,
     // @User('username') username: string,
   ): Promise<IUserResponse> {
+    return this.userService.buildUserResponse(user);
+  }
+
+  @Put('user')
+  @UseGuards(AuthGuard)
+  async updateCurrentUser(
+    @User('id') currentUserId: number,
+    @Body('user') updateUserDto: UpdateUserDto,
+  ): Promise<IUserResponse> {
+    const user = await this.userService.updateUser(
+      currentUserId,
+      updateUserDto,
+    );
+
     return this.userService.buildUserResponse(user);
   }
 }
