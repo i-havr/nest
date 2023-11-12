@@ -1,14 +1,15 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { sign } from 'jsonwebtoken';
+import { compare } from 'bcrypt';
+import 'dotenv/config';
+
+import { UserEntity } from '@app/user/user.entity';
 import { CreateUserDto } from '@app/user/dto/createUser.dto';
 import { LoginUserDto } from '@app/user/dto/loginUser.dto';
 import { UpdateUserDto } from '@app/user/dto/updateUser.dto';
-import { UserEntity } from '@app/user/user.entity';
-import { Repository } from 'typeorm';
-import { sign } from 'jsonwebtoken';
 import { IUserResponse } from '@app/user/types/userResponse.interface';
-import { compare } from 'bcrypt';
-import 'dotenv/config';
 
 @Injectable()
 export class UserService {
