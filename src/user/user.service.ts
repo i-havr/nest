@@ -84,8 +84,8 @@ export class UserService {
   }
 
   // функція findUserById повертає дані залогіненого юзера після того як токен пройшов перевірку та ми отримали id юзера. Використовуємо у мідлварі.
-  findUserById(id: number): Promise<UserEntity> {
-    return this.userRepository.findOne({
+  async findUserById(id: number): Promise<UserEntity> {
+    return await this.userRepository.findOne({
       where: { id },
     });
   }
