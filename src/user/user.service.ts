@@ -20,19 +20,28 @@ export class UserService {
 
   // функція createUser створює юзера та записує його в БД
   async createUser(createUserDto: CreateUserDto): Promise<UserEntity> {
+    const errorResponse = {
+      errors: {},
+    };
+
     const userByEmail = await this.userRepository.findOne({
       where: { email: createUserDto.email },
     });
+
+    if (userByEmail) {
+      errorResponse.errors['email'] = 'Email is already registered';
+    }
 
     const userByUsername = await this.userRepository.findOne({
       where: { username: createUserDto.username },
     });
 
+    if (userByUsername) {
+      errorResponse.errors['username'] = 'Username is already registered';
+    }
+
     if (userByEmail || userByUsername) {
-      throw new HttpException(
-        'Email or username is already registered',
-        HttpStatus.CONFLICT,
-      );
+      throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     const newUser = new UserEntity(); // створюється пустий екземпляр UserEntity {}
@@ -44,16 +53,17 @@ export class UserService {
 
   // функція login перевіряє, чи є юзер у БД та повертає його
   async login(loginUserDto: LoginUserDto): Promise<UserEntity> {
+    const errorResponse = {
+      errors: { 'email or password': 'Credentials are invalid' },
+    };
+
     const userByEmail = await this.userRepository.findOne({
       where: { email: loginUserDto.email },
       select: ['id', 'username', 'email', 'bio', 'image', 'password'],
     });
 
     if (!userByEmail) {
-      throw new HttpException(
-        'The user is not registered',
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     const isPasswordCorrect = await compare(
@@ -62,10 +72,7 @@ export class UserService {
     );
 
     if (!isPasswordCorrect) {
-      throw new HttpException(
-        'Credentials are not valid',
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new HttpException(errorResponse, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     delete userByEmail.password;
